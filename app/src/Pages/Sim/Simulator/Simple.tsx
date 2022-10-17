@@ -11,6 +11,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Toolbox } from './Toolbox';
 import { ActionListTooltip, TeamBuilderTooltip } from './Tooltips';
 import { updateCfg, ready } from '../simSlice';
+import { ActionListBuilder } from './ActionListBuilder';
 
 export function Simple() {
   let { t } = useTranslation();
@@ -60,6 +61,8 @@ export function Simple() {
           </SectionDivider>
 
           <ActionListTooltip />
+
+          <ActionListBuilder/>
 
           <ActionList cfg={cfg} onChange={(v) => dispatch(updateCfg(v))} />
 

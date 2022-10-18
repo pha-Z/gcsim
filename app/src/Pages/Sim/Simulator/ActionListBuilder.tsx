@@ -7,22 +7,21 @@ import { DragDropContext, Droppable, Draggable, DropResult, DraggableStateSnapsh
 // TODO get proper possible actions (which are also based on character?)
 // likely needs to be changed entirely.
 // Look into actions and characters from 'core', 'simActions' or whatever the thing is called
-const availableActions: string[] = [
-    "normal attack",
-    "charge attack",
-    "skill",
-    "burst",
-    "dash",
-    "jump",
-]
-const availableCharacters: string[] = ["raiden", "ayaka"]
+const availableActions: string[] = ["NA", "CA", "E", "Q", "D", "J"]
+const availableCharacters: string[] = ["raiden", "xingqiu", "xiangling", "bennet"]
+const defaultNewAction: string = "NA"
+function defaultNewCharacterAction(): {character: string, actions: string[]} {
+    return {character: availableCharacters[1], actions: [defaultNewAction]}
+}
+
+
 
 // TODO at hint descriptions for elements
 export function ActionListBuilder() {
     const [characterActions, setCharacterActions] = React.useState(
         [
-            {character: "raiden", actions: ["normal attack", "skill"]}, 
-            {character: "ayaka", actions: ["dash"]}
+            {character: "raiden", actions: ["E", "D"]}, 
+            defaultNewCharacterAction()
         ]
     )
     
@@ -30,7 +29,7 @@ export function ActionListBuilder() {
         setCharacterActions(
             [
                 ...characterActions.slice(0, index + 1), 
-                {character: "raiden", actions: ["normal attack"]},
+                defaultNewCharacterAction(),
                 ...characterActions.slice(index + 1)
             ]
         )
@@ -45,7 +44,7 @@ export function ActionListBuilder() {
     function handleAddAction(index: number): void {
         setCharacterActions(characterActions.map((ca: {character: string, actions: string[]}, idx) =>
             idx === index
-             ? {character: ca.character, actions: [...ca.actions, "normal attack"]}
+             ? {character: ca.character, actions: [...ca.actions, defaultNewAction]}
              : ca
             // at specified index, replace with 'characterAction' (with an added 'action')   
             // otherwise map same old characterActions to new ones
@@ -54,7 +53,7 @@ export function ActionListBuilder() {
             //     ...characterActions.slice(0, index - 1),
             //     {   
             //         character: characterActions[index].character, 
-            //         actions: [...characterActions[index].actions, "normal attack"]
+            //         actions: [...characterActions[index].actions, defaultNewAction]
             //     },
             //     ...characterActions.slice(index)
             // ]
@@ -89,23 +88,19 @@ export function ActionListBuilder() {
         ))
     }
 
-    // TODO should be sent to ActionList cfg instead
-    const rotation = characterActions.map(({character, actions}) => 
-        <div>{character} {actions.toString().replace(",", ", ")}{";"}</div>
-    )
-
 
     // component building blocks
     const selectActionEl = (index: number, actionIndex: number, action: string) =>
         <select
             onChange={(e) => handleSelectAction(e, index, actionIndex)}
-            value={action}  
+            value={action}
+            style={{height: "40px", minHeight: "40px", borderRadius: "20px"}}
         >
             {availableActions.map((a, i) => 
                 <option key={i} value={a}>{a}</option>)} {/* TODO get actions from proper character or sth */}
         </select>
     const deleteCharacterActionEl = (index: number) => 
-        <div style={{padding: "3px 3px", minWidth: "50px", backgroundColor: "steelblue"}}>
+        <div className="top-1 left-1">
             <Button 
                 icon="cross"
                 intent="danger"
@@ -113,17 +108,27 @@ export function ActionListBuilder() {
                 onClick={() => handleDeleteCharacterAction(index)}
             />
         </div>
+    const deleteActionEl = (index: number, actionIndex: number) => 
+        <div className="top-1 left-1">
+            <Button
+                icon="cross" 
+                intent="danger" 
+                small 
+                onClick={() => handleDeleteAction(index, actionIndex)}
+            />
+        </div>
     const selectCharacterEl = (index: number) =>
         <select 
             onChange={e => handleSelectCharacter(e, index)}
             value={characterActions[index].character}
+            style={{height: "80px", minHeight: "80px", borderRadius: "40px"}}
         >                      
             {availableCharacters.map((c, i) =>  
                 <option key={i} value={c}>{c}</option>)} {/* TODO get characters from proper team */}
         </select>
     const draggableActionsEl = (index: number, actions: string[]) => actions.map((action, actionIndex) => 
         <Draggable key={actionIndex} draggableId={index+"."+actionIndex} index={actionIndex}>
-            {(provided, snapshot) => 
+            {provided => 
                 <div
                     ref={provided.innerRef} 
                     {...provided.draggableProps}
@@ -133,19 +138,15 @@ export function ActionListBuilder() {
                     
                     
                     <div // styling div
-                        style={{border: "solid red 1px", ...{backgroundColor: (snapshot.isDragging) ? "white" : "black"}}}
+                        style={{border: "solid red 1px", margin: "5px"}}
                     >
                         <div // styling div
-                            style={{padding: "3px 3px", minWidth: "50px", backgroundColor: "purple"}}
+                            style={{padding: "20px 5px", minWidth: "60px"}}
+                            className="flex"
                         >
-                            <Button
-                                icon="cross" 
-                                intent="danger" 
-                                small 
-                                onClick={() => handleDeleteAction(index, actionIndex)}
-                            />
+                            {deleteActionEl(index, actionIndex)}
+                            {selectActionEl(index, actionIndex, action)}
                         </div>
-                        {selectActionEl(index, actionIndex, action)}
                     </div>
 
                     
@@ -166,20 +167,22 @@ export function ActionListBuilder() {
             type="button"
             onClick={() => handleAddCharacterAction(index)}
         >
-            <Icon icon="plus" size={20} color="white" />
+            <Icon icon="plus" size={30} color="white" />
         </button>
     const droppableActionsContainerEl = (index: number, actions: string[]) => 
-        <Droppable droppableId={"actionsDropArea."+index} type={"dropAction"}>
+        <Droppable droppableId={"actionsDropArea."+index} direction="horizontal" type={"dropAction"}>
             {provided =>
                 <div 
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    style={{border: "solid lime 1px", minWidth:"30px"}}
+                    style={{border: "solid lime 1px", minWidth: "30px"}}
+                    className="flex"
                 >
 
                     {deleteCharacterActionEl(index)}
                     {selectCharacterEl(index)}  
                     {draggableActionsEl(index, actions)}
+                    {addActionEl(index)}
 
                     {provided.placeholder}
                 </div>
@@ -198,10 +201,15 @@ export function ActionListBuilder() {
 
                     <div className="flex"> 
                         <div // styling div
-                            style={{border: "solid green 1px"}}
+                            style={{
+                                border: "solid green 1px",
+                                borderRadius: "10px",
+                                backgroundColor: "steelblue",
+                                padding: "25px 5px",
+                                margin: "5px 2px"
+                            }}
                         >
                             {droppableActionsContainerEl(index, characterAction.actions)}
-                            {addActionEl(index)}
                         </div>
                         {addCharacterActionEl(index)}
                     </div>
@@ -268,9 +276,19 @@ export function ActionListBuilder() {
         }
     }
 
+
+
+    // TODO should be sent to ActionList cfg instead
+    const rotation = characterActions.map(({character, actions}) => 
+        <div>{character} {actions.join(", ")}{";"}</div>
+    )
+
+
     return (
         <>
-            {rotation}
+            <div style={{minHeight: "200px", border: "solid white 1px"}}>
+                {rotation}
+            </div>
             {/* dragndrop wrapper */}
             <DragDropContext onDragEnd={handleDrop}>
                     <Droppable droppableId="characterActionsDropArea" direction="horizontal" type="dropCharacterAction">
@@ -281,8 +299,8 @@ export function ActionListBuilder() {
                                 >
 
                                     <div // styling div
-                                        className="flex flex-row flex-wrap pl-2"
-                                        style={{border: "solid 5px grey"}}
+                                        className="flex"
+                                        style={{border: "solid 5px grey", overflowX: "scroll"}}
                                     >
                                         {draggableCharacterActionsEl}
                                     </div>

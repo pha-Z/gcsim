@@ -1,13 +1,10 @@
 import React, { useEffect } from "react"
 import { Button, Icon } from '@blueprintjs/core'
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableStateSnapshot } from "react-beautiful-dnd";
-import { stringify } from "ajv";
-import { defaultModifiers } from "@popperjs/core/lib/popper-lite";
 // dragdrop tutorial
 // https://egghead.io/lessons/react-reorder-a-list-with-react-beautiful-dnd
 
 // TODO get proper possible actions (which are also based on character?)
-// likely needs to be changed entirely.
 // Look into actions and characters from 'core', 'simActions' or whatever the thing is called
 const availableActions: string[] = ["NA", "NA:2", "NA:3", "NA:4", "NA:5", "CA", "E", "Q", "D", "J"]
 const availableCharacters: string[] = ["raiden", "xingqiu", "xiangling", "bennett"]
@@ -24,7 +21,6 @@ const usePrevious = <T extends unknown>(value: T): T | undefined => {
     return ref.current
 }
 
-// TODO at hint descriptions for elements
 export function ActionListBuilder() {
     const [characterActions, setCharacterActions] = React.useState(
         [
@@ -37,7 +33,7 @@ export function ActionListBuilder() {
     // --- could also implement focus with onKeypress event for 'enter' ---
     // keep reference to all select elements
     const refsToSelectElMap: Map<string, React.RefObject<HTMLSelectElement>> = new Map([])
-    // after render, compare previous to new state it changed
+    // after render, compare previous to new state if it changed
     // and identify which select element should be focused next 
     const prevCharacterActions = usePrevious(characterActions)
     React.useEffect(() => {
@@ -228,6 +224,7 @@ export function ActionListBuilder() {
             value={action}
             style={{height: "52px", minHeight: "52px", borderRadius: "26px"}}
             ref={refToSelectEl}
+            onKeyDown={(e) => e.key === 'Delete' && handleDeleteAction(index, actionIndex)}
         >
             {availableActions.map((a, i) => /* TODO get actions from proper character or sth */
                 <option key={i} value={a}>{a}</option>
@@ -235,7 +232,10 @@ export function ActionListBuilder() {
         </select>
     }
     const deleteCharacterActionEl = (index: number) => 
-        <div className="top-1 left-1">
+        <div 
+          className="top-1 left-1"
+          onKeyDown={(e) => e.key === 'Delete' && handleDeleteCharacterAction(index)}
+        >
             <Button 
                 icon="cross"
                 intent="danger"
@@ -244,7 +244,10 @@ export function ActionListBuilder() {
             />
         </div>
     const deleteActionEl = (index: number, actionIndex: number) => 
-        <div className="top-1 left-1">
+        <div
+          className="top-1 left-1"
+          onKeyDown={(e) => e.key === 'Delete' && handleDeleteAction(index, actionIndex)}
+        >
             <Button
                 icon="cross" 
                 intent="danger" 
@@ -252,7 +255,7 @@ export function ActionListBuilder() {
                 onClick={() => handleDeleteAction(index, actionIndex)}
             />
         </div>
-    const selectCharacterEl = (index: number) =>{
+    const selectCharacterEl = (index: number) => {
         const refToSelectEl: React.RefObject<HTMLSelectElement> = React.createRef<HTMLSelectElement>()
         const key = index.toString()
         refsToSelectElMap.set(key, refToSelectEl)
@@ -262,6 +265,7 @@ export function ActionListBuilder() {
             value={characterActions[index].character}
             style={{height: "80px", minHeight: "80px", borderRadius: "40px"}}
             ref={refToSelectEl}
+            onKeyDown={(e) => e.key === 'Delete' && handleDeleteCharacterAction(index)}
         >             
             {availableCharacters.map((c, i) => /* TODO get characters from proper team */
                 <option key={i} value={c}>{c}</option>

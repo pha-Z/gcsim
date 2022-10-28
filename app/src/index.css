@@ -129,3 +129,7 @@ div.bp4-navbar-heading a:hover, div.main-page-button-container a:hover {
   color: inherit;
   text-decoration: inherit;
 }
+
+.blockly-workspace {
+  height: 100vh;
+}

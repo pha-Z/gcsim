@@ -1,4 +1,4 @@
-// TODOs:
+// TODOs for blockly:
 // make all characters work
 // - grab them from team.tsx or something
 // - properly handle iconUrls and 'codeIdentifier'
@@ -12,6 +12,16 @@
 // - not much to translate, but could look into Blockly.Msg[] and i18n things
 // styling
 // - fix buggy workspace size, improve layout
+
+// other TODOs:
+// add dropdown to select an enemy (lvl and res) + input number of enemies
+// could steal from nagi's heroku app or write a script to steal from wiki
+// dropdown menu to set active character at the beginning ( for srl <3 )
+// ^ these settings should persist locally on browser or for logged in user?
+// (same way the other sim settings persist)
+// that way, you dont really have to change them/interact with them 
+// https://discord.com/channels/845087716541595668/983391844631212112/1035679983131168799
+
 
 import React from "react"
 import Blockly from "blockly"
